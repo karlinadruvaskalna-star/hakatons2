@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Latvijas stāsti</title>
+<style>
+:root{--bg:#efe6d2;--paper:#fffaf0;--ink:#2b2218;--muted:#6b5d4c;--red:#b3361f;--line:#cdbfa3;--land:#e3d3a8;--sea:#cfe3e8;--fs:18px;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10182a;--paper:#1c2540;--ink:#f1ead9;--muted:#b4b9c9;--red:#ff8a6b;--line:#3a4668;--land:#3b4a72;--sea:#16203a}}
+:root[data-theme="dark"]{--bg:#10182a;--paper:#1c2540;--ink:#f1ead9;--muted:#b4b9c9;--red:#ff8a6b;--line:#3a4668;--land:#3b4a72;--sea:#16203a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);background:var(--bg);font:var(--fs)/1.55 Georgia,"Times New Roman",serif}
+.wrap{max-width:960px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+h1{font-size:1.9em;margin:0;line-height:1.1}
+.sub{color:var(--red);font-style:italic;margin:2px 0 0}
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;color:inherit}
+.tool{background:var(--paper);border:2px solid var(--line);border-radius:8px;padding:4px 11px;min-height:40px}
+.tool[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:#fff}
+.btn{background:var(--red);color:#fff;border:0;border-radius:10px;padding:10px 16px;min-height:44px;font-weight:700}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+h2{margin:20px 0 6px}
+.muted,.hint{color:var(--muted)}.small{font-size:.8em;margin:4px 0}
+.mapbox{position:relative;background:var(--sea);border:2px solid var(--line);border-radius:14px;padding:8px}
+svg.map{display:block;width:100%;height:auto}
+.land{fill:var(--land);stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round}
+.pin{cursor:pointer}.pin circle:first-child{fill:var(--red);stroke:#fff;stroke-width:3;transition:r .15s}
+.pin .hit{fill:transparent}
+.pin:hover circle:first-child,.pin:focus circle:first-child{r:12}
+.pin:focus{outline:none}.pin:focus circle:first-child{stroke:var(--ink)}
+.dot{fill:var(--red);stroke:#fff;stroke-width:3}
+.tip{position:absolute;width:250px;display:flex;gap:10px;background:var(--paper);border:2px solid var(--line);border-radius:10px;padding:8px;box-shadow:0 6px 20px rgba(0,0,0,.35);pointer-events:none;font-size:.78em;line-height:1.35;z-index:5}
+.tip[hidden]{display:none}.tip i{color:var(--red)}
+.pic{background:var(--g);border-radius:10px;display:grid;place-items:center;position:relative;overflow:hidden}
+.pic::before{content:"";position:absolute;width:30%;aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.35);top:10%;right:10%}
+.pic span{position:relative}
+.pic.mini{width:64px;height:64px;flex:none;font-size:2em}
+.pic.big{width:100%;height:240px;font-size:6em;margin:10px 0}
+img.photo{width:100%;max-height:340px;object-fit:cover;border-radius:10px;margin:10px 0}
+input{width:100%;font:inherit;padding:12px;border:2px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)}
+label{font-weight:700;display:block;margin:8px 0 4px}
+.city{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:6px 16px 10px;margin:10px 0}
+.city h3{margin:6px 0;color:var(--red)}
+.city ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.city a{display:inline-block;padding:8px 14px;min-height:42px;border:2px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none}
+.city a:hover,.city a:focus-visible{border-color:var(--red)}
+.obj{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:6px 20px 20px;margin-top:12px}
+.obj h2{font-size:1.8em;margin:8px 0 0}.obj h3{color:var(--red);margin:18px 0 4px}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:16px 0}
+dt{font-weight:700}dd{margin:0}
+a{color:var(--red)}
+.mini-map{max-width:440px}
+footer{color:var(--muted);font-size:.8em;margin:24px 0}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div><h1 id="ttl"></h1><p class="sub" id="sub"></p></div>
+  <div class="tools">
+    <div class="tools" role="group" aria-label="Language / Valoda / Язык" id="langs"></div>
+    <button class="tool" id="smaller">A−</button>
+    <button class="tool" id="bigger">A+</button>
+    <button class="tool" id="theme"></button>
+  </div>
+</header>
+<main id="view"></main>
+<footer>Skolas hakatona projekts · Hackathon school project · Школьный проект хакатона</footer>
+</div>
+<script>
+const T={
+lv:{title:"Latvijas stāsti",sub:"Karte ar vietām, kuras vērts apskatīt",hint:"Uzbrauc ar kursoru uz punkta, lai redzētu īsu aprakstu, un nospied to, lai lasītu stāstu.",map:"Karte",list:"Vietas pa pilsētām",search:"Meklēt vietu pēc nosaukuma",ph:"Piemēram: Rundāles pils",none:"Nekas netika atrasts.",back:"← Atpakaļ",fee:"Ieejas maksa",free:"Bez maksas",paid:"Maksas ieeja. Aktuālā cena ir oficiālajā vietnē.",link:"Oficiālā vietne",loc:"Atrašanās vieta",gmaps:"Atvērt Google Maps",listen:"🔊 Klausīties stāstu",stop:"⏹ Apturēt",novoice:"Šajā ierīcē nav latviešu valodas balss.",nosyn:"Šī pārlūkprogramma neatbalsta balss funkciju.",story:"Stāsts",theme:"Diena / nakts",tap:"Spied, lai lasītu stāstu",schem:"Shematiska karte, punktu atrašanās vieta ir aptuvena."},
+en:{title:"Stories of Latvia",sub:"A map of places worth visiting",hint:"Hover over a pin to see a short description, and click it to read the story.",map:"Map",list:"Places by city",search:"Search by place name",ph:"For example: Rundāle Palace",none:"Nothing found.",back:"← Back",fee:"Entrance fee",free:"Free",paid:"Paid entry. The current price is on the official website.",link:"Official website",loc:"Location",gmaps:"Open in Google Maps",listen:"🔊 Listen to the story",stop:"⏹ Stop",novoice:"This device has no voice for this language.",nosyn:"This browser does not support speech.",story:"Story",theme:"Day / night",tap:"Click to read the story",schem:"Schematic map, pin positions are approximate."},
+ru:{title:"Истории Латвии",sub:"Карта мест, которые стоит посетить",hint:"Наведите курсор на точку, чтобы увидеть краткое описание, и нажмите на неё, чтобы прочитать историю.",map:"Карта",list:"Места по городам",search:"Поиск по названию",ph:"Например: Рундальский дворец",none:"Ничего не найдено.",back:"← Назад",fee:"Стоимость входа",free:"Бесплатно",paid:"Вход платный. Актуальная цена указана на официальном сайте.",link:"Официальный сайт",loc:"Расположение",gmaps:"Открыть в Google Maps",listen:"🔊 Слушать историю",stop:"⏹ Остановить",novoice:"На этом устройстве нет голоса для этого языка.",nosyn:"Этот браузер не поддерживает озвучивание.",story:"История",theme:"День / ночь",tap:"Нажмите, чтобы прочитать историю",schem:"Схематическая карта, положение точек приблизительное."}
+};
+const CN={Riga:{lv:"Rīga",en:"Riga",ru:"Рига"},Sigulda:{lv:"Sigulda",en:"Sigulda",ru:"Сигулда"},Cesis:{lv:"Cēsis",en:"Cēsis",ru:"Цесис"},Kuldiga:{lv:"Kuldīga",en:"Kuldīga",ru:"Кулдига"},Liepaja:{lv:"Liepāja",en:"Liepāja",ru:"Лиепая"},Rundale:{lv:"Rundāle",en:"Rundāle",ru:"Рундале"},Bauska:{lv:"Bauska",en:"Bauska",ru:"Бауска"},Daugavpils:{lv:"Daugavpils",en:"Daugavpils",ru:"Даугавпилс"},Kolka:{lv:"Kolka",en:"Kolka",ru:"Колка"}};
+// img: ieraksti ceļu uz savu foto (piem., "foto/turaida.jpg"), ja tas ir repozitorijā. Ja tukšs, tiek rādīta ilustrācija.
+// fee: 0 = bez maksas, 1 = maksas. p: konkrētā cena (aizpildiet pēc oficiālās vietnes), piem., "8 €".
+const O=[
+{id:"melngalvju",c:"Riga",lat:56.9475,lon:24.1067,e:"🏛️",h:[20,350],fee:1,p:"",img:"",u:"https://www.melngalvjunams.lv",n:{lv:"Melngalvju nams",en:"House of the Blackheads",ru:"Дом Черноголовых"},s:{lv:"Melngalvju nams atrodas Rātslaukumā Vecrīgā. Ēka celta 14. gadsimtā, Otrajā pasaules karā sagrauta un atjaunota 1990. gadu beigās.",en:"The House of the Blackheads stands in Town Hall Square in Old Riga. It dates from the 14th century, was destroyed in the Second World War and rebuilt in the late 1990s.",ru:"Дом Черноголовых стоит на Ратушной площади в Старой Риге. Здание относится к XIV веку, было разрушено во время Второй мировой войны и восстановлено в конце 1990-х годов."}},
+{id:"brivibas",c:"Riga",lat:56.9516,lon:24.1137,e:"🗽",h:[0,330],fee:0,p:"",img:"",u:"https://www.latvia.travel",n:{lv:"Brīvības piemineklis",en:"Freedom Monument",ru:"Памятник Свободы"},s:{lv:"Brīvības piemineklis Rīgas centrā atklāts 1935. gadā. Tā augšgalā stāv Milda, kas paceļ trīs zvaigznes.",en:"The Freedom Monument in central Riga was unveiled in 1935. At its top stands Milda, who holds up three stars.",ru:"Памятник Свободы в центре Риги открыт в 1935 году. На его вершине стоит Милда, поднимающая три звезды."}},
+{id:"turaida",c:"Sigulda",lat:57.1833,lon:24.8456,e:"🏰",h:[140,190],fee:1,p:"",img:"",u:"https://www.turaida-muzejs.lv",n:{lv:"Turaidas pils",en:"Turaida Castle",ru:"Турайдский замок"},s:{lv:"Turaidas pili sāka celt 1214. gadā. Ar to saistīta leģenda par Turaidas Rozi Māiju, kura 1620. gadā izvēlējās nāvi, nevis nodevību.",en:"Construction of Turaida Castle began in 1214. It is linked to the legend of Maija, the Rose of Turaida, who in 1620 chose death over betrayal.",ru:"Строительство Турайдского замка началось в 1214 году. С ним связана легенда о Майе, Турайдской розе, которая в 1620 году выбрала смерть, а не предательство."}},
+{id:"gutmana",c:"Sigulda",lat:57.1717,lon:24.8556,e:"🕳️",h:[30,10],fee:0,p:"",img:"",u:"https://www.latvia.travel",n:{lv:"Gūtmaņa ala",en:"Gūtmanis Cave",ru:"Пещера Гутмана"},s:{lv:"Gūtmaņa ala ir viena no lielākajām alām Baltijā. Tās sienās ir daudz uzrakstu, ko cilvēki atstājuši vairāku gadsimtu laikā.",en:"Gūtmanis Cave is one of the largest caves in the Baltics. Its walls carry many inscriptions left by visitors over several centuries.",ru:"Пещера Гутмана — одна из крупнейших пещер Прибалтики. На её стенах много надписей, оставленных посетителями на протяжении нескольких веков."}},
+{id:"cesis",c:"Cesis",lat:57.3116,lon:25.2733,e:"🔦",h:[270,320],fee:1,p:"",img:"",u:"https://www.cesupils.lv",n:{lv:"Cēsu pils",en:"Cēsis Castle",ru:"Цесисский замок"},s:{lv:"Cēsu viduslaiku pils bija Livonijas ordeņa mestra rezidence. Pa tās tumšajiem torņiem apmeklētāji iet ar laternām.",en:"Cēsis Medieval Castle was the residence of the Master of the Livonian Order. Visitors explore its dark towers carrying lanterns.",ru:"Цесисский средневековый замок был резиденцией магистра Ливонского ордена. Посетители осматривают его тёмные башни с фонарями."}},
+{id:"rumba",c:"Kuldiga",lat:56.9691,lon:21.9689,e:"🌊",h:[190,220],fee:0,p:"",img:"",u:"https://www.visitkuldiga.com",n:{lv:"Ventas rumba",en:"Venta Rapid",ru:"Вентас румба"},s:{lv:"Ventas rumba ir ap 249 m plata, un to uzskata par platāko ūdenskritumu Eiropā. Pavasarī šeit var redzēt zivis lecam augšup pa straumi.",en:"The Venta Rapid is about 249 m wide and is considered the widest waterfall in Europe. In spring you can watch fish leaping upstream here.",ru:"Вентас румба имеет ширину около 249 м и считается самым широким водопадом в Европе. Весной здесь можно увидеть, как рыбы прыгают вверх по течению."}},
+{id:"tilts",c:"Kuldiga",lat:56.9667,lon:21.9692,e:"🌉",h:[15,345],fee:0,p:"",img:"",u:"https://www.visitkuldiga.com",n:{lv:"Ķieģeļu tilts",en:"Brick Bridge",ru:"Кирпичный мост"},s:{lv:"Ķieģeļu tilts pār Ventu celts 1874. gadā. To uzskata par vienu no garākajiem ķieģeļu tiltiem Eiropā.",en:"The Brick Bridge over the Venta was built in 1874. It is considered one of the longest brick bridges in Europe.",ru:"Кирпичный мост через Венту построен в 1874 году. Его считают одним из самых длинных кирпичных мостов в Европе."}},
+{id:"karosta",c:"Liepaja",lat:56.5518,lon:21.0105,e:"⛓️",h:[220,250],fee:1,p:"",img:"",u:"https://www.karostascietums.lv",n:{lv:"Karostas cietums",en:"Karosta Prison",ru:"Тюрьма Карости"},s:{lv:"Karostas cietums bijis militārais cietums Liepājas Karostā. Tagad tur notiek ekskursijas, un cietumu var apskatīt iekšpusē.",en:"Karosta Prison was a military prison in the Karosta district of Liepāja. Today it offers guided tours so visitors can see the inside.",ru:"Тюрьма Карости была военной тюрьмой в районе Лиепаи Каросте. Сегодня здесь проводятся экскурсии, и можно осмотреть её изнутри."}},
+{id:"rundale",c:"Rundale",lat:56.4147,lon:24.0222,e:"👑",h:[48,28],fee:1,p:"",img:"",u:"https://www.rundale.net",n:{lv:"Rundāles pils",en:"Rundāle Palace",ru:"Рундальский дворец"},s:{lv:"Rundāles pili 18. gadsimtā cēla hercogs Ernsts Johans Bīrons. Tās arhitekts ir Bartolomeo Rastrelli, un blakus ir franču dārzs un rožu dārzs.",en:"Rundāle Palace was built in the 18th century for Duke Ernst Johann Biron. Its architect was Bartolomeo Rastrelli, and it has a French garden and a rose garden.",ru:"Рундальский дворец построен в XVIII веке для герцога Эрнста Иоганна Бирона. Его архитектор — Бартоломео Растрелли, рядом находятся французский сад и розарий."}},
+{id:"bauska",c:"Bauska",lat:56.4046,lon:24.1923,e:"🏯",h:[100,150],fee:1,p:"",img:"",u:"https://www.bauskaspils.lv",n:{lv:"Bauskas pils",en:"Bauska Castle",ru:"Бауский замок"},s:{lv:"Bauskas pils celta 15. gadsimtā. Tā sastāv no ordeņa pils un hercogu pils, un pilsdrupu tornī var uzkāpt.",en:"Bauska Castle was built in the 15th century. It consists of an Order castle and a ducal palace, and you can climb the tower of the ruins.",ru:"Бауский замок построен в XV веке. Он состоит из замка ордена и герцогского дворца, а на башню руин можно подняться."}},
+{id:"rotko",c:"Daugavpils",lat:55.87,lon:26.53,e:"🎨",h:[330,280],fee:1,p:"",img:"",u:"https://www.rothkocenter.com",n:{lv:"Marka Rotko mākslas centrs",en:"Mark Rothko Art Centre",ru:"Центр искусств Марка Ротко"},s:{lv:"Marka Rotko mākslas centrs atrodas Daugavpils cietoksnī. Mārks Rotko dzimis Daugavpilī 1903. gadā.",en:"The Mark Rothko Art Centre is located in the Daugavpils Fortress. Mark Rothko was born in Daugavpils in 1903.",ru:"Центр искусств Марка Ротко находится в Даугавпилсской крепости. Марк Ротко родился в Даугавпилсе в 1903 году."}},
+{id:"kolka",c:"Kolka",lat:57.7575,lon:22.5917,e:"🧭",h:[205,260],fee:0,p:"",img:"",u:"https://www.latvia.travel",n:{lv:"Kolkasrags",en:"Cape Kolka",ru:"Мыс Колка"},s:{lv:"Kolkasragā satiekas Baltijas jūra un Rīgas līcis. Tas ir Kurzemes ziemeļu gals.",en:"At Cape Kolka the Baltic Sea meets the Gulf of Riga. It is the northern tip of Courland.",ru:"У мыса Колка встречаются Балтийское море и Рижский залив. Это северная оконечность Курземе."}}
+];
+// Aptuvens Latvijas kontūras attēlojums (garums, platums)
+const B=[[21.05,56.08],[21.0,56.55],[21.2,57.0],[21.55,57.4],[22.0,57.6],[22.6,57.76],[22.75,57.55],[23.15,57.35],[23.3,57.05],[23.8,56.97],[24.1,56.95],[24.4,57.25],[24.35,57.85],[25.2,57.97],[26.0,57.78],[26.7,57.55],[27.35,57.53],[27.7,57.1],[28.15,56.55],[28.2,56.15],[27.7,56.0],[27.0,55.85],[26.6,55.68],[26.0,55.9],[25.6,56.1],[25.0,56.17],[24.3,56.05],[23.6,56.37],[22.9,56.4],[22.1,56.4],[21.55,56.3]];
+const px=lon=>(lon-20.9)*78,py=lat=>(58.1-lat)*143;
+const $=s=>document.querySelector(s);
+let L="lv",q="";
+try{L=localStorage.getItem("lang")||"lv"}catch(e){}
+const t=k=>T[L][k];
+const grad=o=>`linear-gradient(135deg,hsl(${o.h[0]} 75% 58%),hsl(${o.h[1]} 70% 38%))`;
+const first=s=>s.slice(0,s.indexOf(". ")+1);
+const pic=(o,big)=>o.img?`<img class="photo" src="${o.img}" alt="${o.n[L]}">`:`<div class="pic ${big?"big":"mini"}" style="--g:${grad(o)}" role="img" aria-label="${o.n[L]}"><span>${o.e}</span></div>`;
+
+// === PAŠU RAKSTĪTAIS KODS (komandai: uzrakstiet šo funkciju paši, bez MI) ===
+// Atgriež objektus, kuru nosaukumā (izvēlētajā valodā) ir ievadītais teksts, ignorējot garumzīmes un lielos burtus.
+function atrastObjektus(teksts){
+  const norm=s=>s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  const x=norm(teksts.trim());
+  return O.filter(o=>norm(o.n[L]).includes(x));
+}
+// === PAŠU KODA BEIGAS ===
+
+function mapSVG(list,one){
+  const path="M"+B.map(p=>px(p[0]).toFixed(1)+","+py(p[1]).toFixed(1)).join("L")+"Z";
+  const cnt={},idx={};list.forEach(o=>cnt[o.c]=(cnt[o.c]||0)+1);
+  const pins=list.map(o=>{
+    let x=px(o.lon);const y=py(o.lat);
+    if(one)return`<circle class="dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="9"/>`;
+    if(cnt[o.c]>1){idx[o.c]=idx[o.c]||0;x+=(idx[o.c]++-(cnt[o.c]-1)/2)*20}
+    return`<g class="pin" tabindex="0" role="link" data-id="${o.id}" aria-label="${o.n[L]}"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="9"/><circle class="hit" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="17"/></g>`;
+  }).join("");
+  return`<svg class="map${one?" mini-map":""}" viewBox="0 0 580 350" role="img" aria-label="${t("map")}"><path class="land" d="${path}"/>${pins}</svg>`;
+}
+function showTip(g){
+  const o=O.find(x=>x.id===g.dataset.id),tip=$("#tip"),mb=$("#mb");
+  tip.innerHTML=pic(o,0)+`<div><b>${o.n[L]}</b><br>${first(o.s[L])}<br><i>${t("tap")}</i></div>`;
+  tip.hidden=false;
+  const r=g.getBoundingClientRect(),b=mb.getBoundingClientRect();
+  tip.style.left=Math.max(0,Math.min(r.left-b.left+r.width/2-125,b.width-250))+"px";
+  let top=r.top-b.top-tip.offsetHeight-8;if(top<0)top=r.bottom-b.top+8;
+  tip.style.top=top+"px";
+}
+function renderList(){
+  const found=atrastObjektus(q),cities=[...new Set(O.map(o=>o.c))];
+  const h=cities.map(c=>{
+    const a=found.filter(o=>o.c===c);if(!a.length)return"";
+    return`<section class="city"><h3>${CN[c][L]}</h3><ul>${a.map(o=>`<li><a href="#${o.id}">${o.e} ${o.n[L]}</a></li>`).join("")}</ul></section>`;
+  }).join("");
+  $("#res").innerHTML=h||`<p class="muted">${t("none")}</p>`;
+}
+function home(){
+  $("#view").innerHTML=`<p class="hint">${t("hint")}</p><div class="mapbox" id="mb">${mapSVG(O,false)}<div class="tip" id="tip" hidden></div></div><p class="muted small">${t("schem")}</p><h2>${t("list")}</h2><label for="q">${t("search")}</label><input id="q" type="search" autocomplete="off" placeholder="${t("ph")}"><div id="res"></div>`;
+  $("#q").value=q;$("#q").oninput=e=>{q=e.target.value;renderList()};
+  const mb=$("#mb"),pin=e=>e.target.closest(".pin");
+  ["mouseover","focusin"].forEach(ev=>mb.addEventListener(ev,e=>{const g=pin(e);if(g)showTip(g)}));
+  ["mouseout","focusout"].forEach(ev=>mb.addEventListener(ev,e=>{if(pin(e))$("#tip").hidden=true}));
+  mb.addEventListener("click",e=>{const g=pin(e);if(g)location.hash=g.dataset.id});
+  mb.addEventListener("keydown",e=>{const g=pin(e);if(g&&e.key==="Enter")location.hash=g.dataset.id});
+  renderList();
+}
+function setAud(on){const b=$("#aud");if(b)b.textContent=on?t("stop"):t("listen")}
+function speak(o){
+  const syn=window.speechSynthesis,note=$("#anote");note.textContent="";
+  if(!syn){note.textContent=t("nosyn");return}
+  if(syn.speaking){syn.cancel();setAud(false);return}
+  const v=syn.getVoices();
+  if(v.length&&!v.some(x=>x.lang.toLowerCase().startsWith(L))){note.textContent=t("novoice");return}
+  const u=new SpeechSynthesisUtterance(o.n[L]+". "+o.s[L]);
+  u.lang={lv:"lv-LV",en:"en-GB",ru:"ru-RU"}[L];u.onend=u.onerror=()=>setAud(false);
+  syn.speak(u);setAud(true);
+}
+function obj(o){
+  $("#view").innerHTML=`<p><button class="btn ghost" id="bk">${t("back")}</button></p><article class="obj">${pic(o,1)}<h2>${o.n[L]}</h2><p class="muted">${CN[o.c][L]}</p><h3>${t("story")}</h3><p>${o.s[L]}</p><p><button class="btn" id="aud">${t("listen")}</button></p><p class="muted" id="anote" role="status"></p><dl><dt>${t("fee")}</dt><dd>${o.fee?(o.p?o.p+". ":"")+t("paid"):t("free")}</dd><dt>${t("link")}</dt><dd><a href="${o.u}" target="_blank" rel="noopener noreferrer">${o.u.replace("https://","")}</a></dd></dl><h3>${t("loc")}</h3>${mapSVG([o],true)}<p class="small muted">${o.lat.toFixed(4)}, ${o.lon.toFixed(4)} · <a href="https://www.google.com/maps?q=${o.lat},${o.lon}" target="_blank" rel="noopener noreferrer">${t("gmaps")}</a></p></article>`;
+  $("#bk").onclick=()=>{location.hash=""};
+  $("#aud").onclick=()=>speak(o);
+}
+function route(){
+  if(window.speechSynthesis)speechSynthesis.cancel();
+  const o=O.find(x=>x.id===location.hash.slice(1));
+  o?obj(o):home();window.scrollTo(0,0);
+}
+function chrome(){
+  document.documentElement.lang=L;document.title=t("title");
+  $("#ttl").textContent=t("title");$("#sub").textContent=t("sub");$("#theme").textContent=t("theme");
+  $("#langs").innerHTML=["lv","en","ru"].map(l=>`<button class="tool" data-l="${l}" aria-pressed="${l===L}">${l.toUpperCase()}</button>`).join("");
+}
+$("#langs").addEventListener("click",e=>{
+  const l=e.target.dataset.l;if(!l)return;L=l;try{localStorage.setItem("lang",L)}catch(x){}
+  chrome();route();
+});
+window.addEventListener("hashchange",route);
+
+// Pieejamība: burtu izmērs un tēma
+let fs=18;
+try{fs=parseInt(localStorage.getItem("fs"))||18;const th=localStorage.getItem("th");if(th)document.documentElement.dataset.theme=th}catch(e){}
+function setFs(v){fs=Math.min(26,Math.max(14,v));document.documentElement.style.setProperty("--fs",fs+"px");try{localStorage.setItem("fs",fs)}catch(e){}}
+setFs(fs);
+$("#bigger").onclick=()=>setFs(fs+2);$("#smaller").onclick=()=>setFs(fs-2);
+$("#theme").onclick=()=>{
+  const c=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");
+  const n=c==="dark"?"light":"dark";document.documentElement.dataset.theme=n;
+  try{localStorage.setItem("th",n)}catch(e){}
+};
+chrome();route();
+</script>
+</body>
+</html>
